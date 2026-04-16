@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import get_session
 from app.api.models.profiles import Profile
 from app.api.services.profile_service import profile_service
-from app.api.schemas.profiles import ProfileResponse, ProfileCreate
+from app.api.schemas.profiles import ProfileResponse, ProfileCreate, ProfileExist
 
 
 profile_router = APIRouter()
@@ -48,17 +48,22 @@ async def get_profile_by_id(
 @profile_router.post(
     "/profiles",
     status_code=201,
-    response_model=ProfileResponse,
+    response_model=ProfileExist | ProfileResponse,
     description="Create a profile",
 )
 async def create_profile(
     profile_create: ProfileCreate,
     session: Annotated[AsyncSession, Depends(get_session)],
 ):
-    user_profile: Profile = await profile_service.create_profile(
-        profile_create, session
+    profile_data: dict = await profile_service.create_profile(profile_create, session)
+    exists: bool = profile_data.get("exists")
+    user_profile: Profile = profile_data.get("data")
+
+    return (
+        ProfileExist(data=user_profile)
+        if exists
+        else ProfileResponse(data=user_profile)
     )
-    return ProfileResponse(data=user_profile)
 
 
 @profile_router.delete(

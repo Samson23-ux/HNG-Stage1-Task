@@ -154,7 +154,7 @@ class ProfileService:
         )
 
         if existing_profile:
-            return existing_profile
+            return {"data": existing_profile, "exists": True}
 
         agify_res: dict = await self.agify_request(name)
         genderize_res: dict = await self.genderize_request(name)
@@ -199,7 +199,7 @@ class ProfileService:
 
             profile: Profile = await profile_repo.get_profile(profile_id, session)
             await session.commit()
-            return profile
+            return {"data": profile, "exists": False}
         except Exception as e:
             await session.rollback()
             raise ServerError() from e
