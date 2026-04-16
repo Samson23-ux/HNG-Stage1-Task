@@ -18,7 +18,7 @@ from app.api.schemas.profiles import GenderEnum, AgeGroupEnum
 class Profile(Base):
     __tablename__ = "profiles"
 
-    id = Column(UUID, default="uuid_generate_v7()")
+    id = Column(UUID)
     name = Column(String, nullable=False)
     gender = Column(Enum(GenderEnum), nullable=False)
     gender_probability = Column(Float, nullable=False)
@@ -33,6 +33,7 @@ class Profile(Base):
 
     __table_args__ = (
         PrimaryKeyConstraint("id", name="profiles_id_pk"),
+        Index("idx_profiles_name", name),
         Index("idx_profiles_gender", gender),
         Index("idx_profiles_age_group", age_group),
         Index("idx_profiles_country_id", country_id),

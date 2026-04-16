@@ -18,6 +18,25 @@ async def test_create_profile(async_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_profile_exists(async_client: AsyncClient):
+    payload: dict = {"name": "sergio"}
+
+    await async_client.post(
+        "/api/profiles",
+        json=payload
+    )
+
+    res: Response = await async_client.post(
+        "/api/profiles",
+        json=payload
+    )
+    json_res = res.json()
+
+    assert res.status_code == 201
+    assert json_res["data"]["name"] == payload.get("name")
+
+
+@pytest.mark.asyncio
 async def test_wrong_name_type(async_client: AsyncClient):
     payload: dict = {"name": 2}
 
