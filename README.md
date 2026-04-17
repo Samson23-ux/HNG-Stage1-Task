@@ -84,9 +84,9 @@ The API will be available at:
 
 ### Deployed
 
-- [Live App](<deployed url>)
+- [Live App](https://perpetual-illumination-production-af59.up.railway.app)
 
-- [API Documentation](<deployed url>)
+- [API Documentation](https://perpetual-illumination-production-af59.up.railway.app)
 
 ## Running Tests 🧪
 
