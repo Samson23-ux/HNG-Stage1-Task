@@ -17,13 +17,13 @@ class ProfileRepo:
         stmt = select(Profile)
 
         if gender:
-            stmt = stmt.where(func.lower(Profile.gender) == gender.lower())
+            stmt = stmt.where(Profile.gender == gender.lower())
 
         if country_id:
             stmt = stmt.where(func.lower(Profile.country_id) == country_id.lower())
 
         if age_group:
-            stmt = stmt.where(func.lower(Profile.age_group) == age_group.lower())
+            stmt = stmt.where(Profile.age_group == age_group.lower())
 
         res = await session.execute(stmt)
         profiles: Sequence[Profile] = res.scalars().all()
