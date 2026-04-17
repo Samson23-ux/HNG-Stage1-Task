@@ -7,7 +7,7 @@ from httpx import AsyncClient, Response, ConnectTimeout, ConnectError
 
 from app.utils import is_digit
 from app.api.models.profiles import Profile
-from app.api.schemas.profiles import ProfileCreate
+from app.api.schemas.profiles import ProfileCreate, Profile as ProfileSchema
 from app.api.repo.profile_repo import profile_repo
 from app.core.exceptions import (
     ServerError,
@@ -114,7 +114,7 @@ class ProfileService:
         gender: Optional[str] = None,
         country_id: Optional[str] = None,
         age_group: Optional[str] = None,
-    ) -> Sequence[Profile]:
+    ) -> list[ProfileSchema]:
         try:
             profiles: Sequence[Profile] = await profile_repo.get_profiles(
                 session, gender, country_id, age_group
@@ -122,14 +122,18 @@ class ProfileService:
 
             if not profiles:
                 raise ProfilesNotFoundError()
-            return profiles
+
+            profiles_out: list[ProfileSchema] = []
+            for profile in profiles:
+                profiles_out.append(ProfileSchema.model_validate(profile))
+            return profiles_out
         except Exception as e:
             if isinstance(e, ProfilesNotFoundError):
                 raise ProfilesNotFoundError()
 
             raise ServerError() from e
 
-    async def get_profile(self, profile_id: UUID, session: AsyncSession):
+    async def get_profile(self, profile_id: UUID, session: AsyncSession) -> ProfileSchema:
         try:
             profile: Profile | None = await profile_repo.get_profile(
                 profile_id, session
@@ -137,7 +141,9 @@ class ProfileService:
 
             if not profile:
                 raise ProfileNotFoundError(profile_id=profile_id)
-            return profile
+
+            profile_out: ProfileSchema = ProfileSchema.model_validate(profile)
+            return profile_out
         except Exception as e:
             if isinstance(e, ProfileNotFoundError):
                 raise ProfileNotFoundError(profile_id=profile_id)
@@ -146,7 +152,7 @@ class ProfileService:
 
     async def create_profile(
         self, profile_create: ProfileCreate, session: AsyncSession
-    ) -> Profile:
+    ) -> ProfileSchema:
         name: str = profile_create.name
 
         existing_profile: Profile | None = await profile_repo.get_profile_by_name(
@@ -154,7 +160,8 @@ class ProfileService:
         )
 
         if existing_profile:
-            return {"data": existing_profile, "exists": True}
+            existing_profile_out: ProfileSchema = ProfileSchema.model_validate(existing_profile)
+            return {"data": existing_profile_out, "exists": True}
 
         agify_res: dict = await self.agify_request(name)
         genderize_res: dict = await self.genderize_request(name)
@@ -198,8 +205,10 @@ class ProfileService:
             profile_id: UUID = profile_db.id
 
             profile: Profile = await profile_repo.get_profile(profile_id, session)
+            profile_out: ProfileSchema = ProfileSchema.model_validate(profile)
+
             await session.commit()
-            return {"data": profile, "exists": False}
+            return {"data": profile_out, "exists": False}
         except Exception as e:
             await session.rollback()
             raise ServerError() from e

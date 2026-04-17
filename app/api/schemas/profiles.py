@@ -1,6 +1,5 @@
 from uuid import UUID
 from enum import Enum
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
@@ -21,6 +20,8 @@ class ProfileCreate(BaseModel):
 
 
 class Profile(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     name: str
     gender: GenderEnum
@@ -30,9 +31,7 @@ class Profile(BaseModel):
     age_group: AgeGroupEnum
     country_id: str
     country_probability: float
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
+    created_at: str
 
 
 class ProfileResponse(BaseModel):

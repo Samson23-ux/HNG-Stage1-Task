@@ -1,5 +1,4 @@
 import pytest_asyncio
-from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import (
@@ -16,15 +15,16 @@ from app.main import app
 from app.database.base import Base
 from app.core.config import settings
 from app.dependencies import get_session
+from app.api.models.profiles import Profile
 
 
 @pytest_asyncio.fixture(scope="session")
 async def async_engine():
     async_db_engine: AsyncEngine = create_async_engine(
-        url=settings.ASYNC_DB_URL, poolclass=NullPool
+        url=settings.ASYNC_TEST_DB_URL, poolclass=NullPool
     )
 
-    async with async_db_engine.connect() as conn:
+    async with async_db_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
     yield async_db_engine

@@ -1,12 +1,11 @@
 from uuid import UUID
 from typing import Annotated
-from sqlalchemy import Sequence
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from app.dependencies import get_session
-from app.api.models.profiles import Profile
+from app.api.schemas.profiles import Profile
 from app.api.services.profile_service import profile_service
 from app.api.schemas.profiles import ProfileResponse, ProfileCreate, ProfileExist
 
@@ -26,7 +25,7 @@ async def get_all_profiles(
     country_id: Annotated[str, Query(description="Filter profiles by country")] = None,
     age_group: Annotated[str, Query(description="Filter profiles by age_group")] = None,
 ):
-    profiles: Sequence[Profile] = await profile_service.get_profiles(
+    profiles: list[Profile] = await profile_service.get_profiles(
         session, gender, country_id, age_group
     )
     return ProfileResponse(data=profiles)
