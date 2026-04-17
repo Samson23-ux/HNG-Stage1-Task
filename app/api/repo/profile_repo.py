@@ -1,5 +1,5 @@
 from uuid import UUID
-from sqlalchemy import select, Sequence
+from sqlalchemy import select, Sequence, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -17,13 +17,13 @@ class ProfileRepo:
         stmt = select(Profile)
 
         if gender:
-            stmt = stmt.where(Profile.gender == gender)
+            stmt = stmt.where(func.lower(Profile.gender) == gender.lower())
 
         if country_id:
-            stmt = stmt.where(Profile.country_id == country_id)
+            stmt = stmt.where(func.lower(Profile.country_id) == country_id.lower())
 
         if age_group:
-            stmt = stmt.where(Profile.age_group == age_group)
+            stmt = stmt.where(func.lower(Profile.age_group) == age_group.lower())
 
         res = await session.execute(stmt)
         profiles: Sequence[Profile] = res.scalars().all()
