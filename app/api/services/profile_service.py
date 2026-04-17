@@ -1,5 +1,6 @@
+from uuid import UUID
+from uuid6 import uuid7
 from typing import Optional
-from uuid import UUID, uuid7
 from sqlalchemy import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from httpx import AsyncClient, Response, ConnectTimeout, ConnectError
